@@ -24,7 +24,6 @@ const CreateBeli = () => {
     const [isShow, setIsShow] = useState(false);
     const [input, setInput] = useState("");
 
-    const [items, getItems] = useState([]);
     const [selectedSatuan, setSelectedSatuan] = useState(0);
     const [satuan, setSatuan] = useState([]);
     const [savedItems, setSavedItems] = useState([]);
@@ -61,17 +60,6 @@ const CreateBeli = () => {
             name: ""
         }).then(response => {
             setSatuan(response.data.response);
-        });
-
-        axios.post(`${endPoint}item`, {
-            page: 1,
-            per_page: 10,
-            name: ""
-        }).then((response) => {
-            let state = [];
-            response.data.response.map((data) => state = [...state, { value: data.id, label: data.name }]);
-
-            getItems(state);
         });
     }, []);
 
@@ -151,9 +139,9 @@ const CreateBeli = () => {
         }).then(async response => {
             let suggests = [];
 
-            await Promise.all(response.data.response.map((data) => {
+            await Promise.all(response.data.response.map((data) =>
                 suggests = [...suggests, data.name]
-            }));
+            ));
 
             setActive(0);
             setFiltered(suggests);

@@ -18,7 +18,6 @@ import { useForm, Controller } from "react-hook-form";
 import { useEffect, useState } from 'react';
 import { endPoint, formatRupiah } from '../../../variables/config';
 import axios from 'axios';
-import Select from 'react-select'
 
 const UpdateBeli = () => {
     const [active, setActive] = useState(0);
@@ -26,7 +25,6 @@ const UpdateBeli = () => {
     const [isShow, setIsShow] = useState(false);
     const [input, setInput] = useState("");
 
-    const [items, getItems] = useState([]);
     const [selectedSatuan, setSelectedSatuan] = useState(0);
     const [satuan, setSatuan] = useState([]);
     const [savedItems, setSavedItems] = useState([]);
@@ -97,17 +95,6 @@ const UpdateBeli = () => {
             setDefaultData(response.data.response_data);
             setTotalPrice(response.data.response_data.price_total);
             getItemDataSaved();
-        });
-
-        axios.post(`${endPoint}item`, {
-            page: 1,
-            per_page: 10,
-            name: ""
-        }).then((response) => {
-            let state = [];
-            response.data.response.map((data) => state = [...state, { value: data.id, label: data.name }]);
-
-            getItems(state);
         });
         // eslint-disable-next-line
     }, []);
@@ -190,9 +177,7 @@ const UpdateBeli = () => {
         }).then(async response => {
             let suggests = [];
 
-            await Promise.all(response.data.response.map((data) => {
-                suggests = [...suggests, data.name]
-            }));
+            await Promise.all(response.data.response.map((data) => suggests = [...suggests, data.name]));
 
             setActive(0);
             setFiltered(suggests);
@@ -252,7 +237,7 @@ const UpdateBeli = () => {
 
     return (
         <>
-            <Header />=
+            <Header />
             <Container className="mt--7" fluid>
                 <Row>
                     <div className="col">

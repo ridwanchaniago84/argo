@@ -64,7 +64,7 @@ const ViewBeli = () => {
 
     return (
         <>
-            <Header />=
+            <Header />
             <Container className="mt--7" fluid>
                 <Row>
                     <div className="col">
