@@ -29,8 +29,8 @@ import CreateItem from '../views/Admin/Pembelian/CreateItem';
 import CreateBeli from '../views/Admin/Pembelian/CreateBeli';
 import UpdateBeli from '../views/Admin/Pembelian/UpdateBeli';
 import ViewBeli from '../views/Admin/Pembelian/ViewBeli';
-import RouteGuardItem from '../components/RouteGuardItem';
-import RouteGuardPembelian from '../components/RouteGuardPembelian'
+import { RouteWriteGuardItem } from '../components/RouteGuardItem';
+import { RouteWriteGuardPembelian, RouteReadGuardPembelian } from '../components/RouteGuardPembelian'
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
@@ -88,25 +88,25 @@ const Admin = (props) => {
         />
         <Switch>
           {getRoutes(routes)}
-          <RouteGuardItem path='/admin/item/create'
+          <RouteWriteGuardItem path='/admin/item/create'
             component={CreateItem} />
           {/* <Route
             path='/admin/item/create'
             component={CreateItem}
           /> */}
-          <RouteGuardPembelian path='/admin/beli/create'
+          <RouteWriteGuardPembelian path='/admin/beli/create'
             component={CreateBeli} />
           {/* <Route
             path='/admin/beli/create'
             component={CreateBeli}
           /> */}
-          <RouteGuardPembelian path='/admin/beli/:beliId'
+          <RouteWriteGuardPembelian path='/admin/beli/:beliId'
             component={UpdateBeli} />
           {/* <Route
             path='/admin/beli/:beliId'
             component={UpdateBeli}
           /> */}
-          <RouteGuardPembelian path='/admin/view/beli/:beliId'
+          <RouteReadGuardPembelian path='/admin/view/beli/:beliId'
             component={ViewBeli} />
           {/* <Route
             path='/admin/view/beli/:beliId'

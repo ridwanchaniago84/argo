@@ -63,6 +63,34 @@ const Pembelian = () => {
       });
   }, []);
 
+  const ButtonUpdate = (props) => {
+    if (userData.previlege[1]['Detail Akses Item'].Create) {
+      return (
+        <Button
+          color="primary"
+          onClick={() => {
+            window.location.href = `/admin/beli/${props.id}`;
+          }}>
+          Update
+        </Button>
+      );
+    }
+  }
+
+  const ButtonDetail = (props) => {
+    if (userData.previlege[1]['Detail Akses Item'].Read) {
+      return (
+        <Button
+          color="secondary"
+          onClick={() => {
+            window.location.href = `/admin/view/beli/${props.id}`;
+          }}>
+          View
+        </Button>
+      );
+    }
+  }
+
   const columns = [{
     dataField: 'id',
     text: 'text',
@@ -111,20 +139,9 @@ const Pembelian = () => {
     isDummyField: true,
     text: 'Aksi',
     formatter: (cell, row, rowIndex) => {
-      return <><Button
-        color="primary"
-        onClick={() => {
-          window.location.href = `/admin/beli/${row.id}`;
-        }}>
-        Update
-        </Button>
-        <Button
-          color="secondary"
-          onClick={() => {
-            window.location.href = `/admin/view/beli/${row.id}`;
-          }}>
-          View
-        </Button>
+      return <>
+        <ButtonUpdate id={row.id} />
+        <ButtonDetail id={row.id} />
       </>
     }
   },
@@ -145,15 +162,23 @@ const Pembelian = () => {
     }
   }
 
+  const AddItem = () => {
+    if (userData.previlege[0]['Detail Akses Item'].Create) {
+      return (
+        <Link
+          to="/admin/item/create"
+        >
+          <Button className="my-3 float-right" color="primary">Add</Button>
+        </Link>
+      );
+    }
+  }
+
   const TableItem = () => {
     if (userData.previlege[0].Item) {
       return (
         <TabPane tabId="1">
-          <Link
-            to="/admin/item/create"
-          >
-            <Button className="my-3 float-right" color="primary">Add</Button>
-          </Link>
+          <AddItem />
           <TableBoostrap products={products} columns={columns} />
         </TabPane>
       )
@@ -175,15 +200,23 @@ const Pembelian = () => {
     }
   }
 
+  const AddPembelian = () => {
+    if (userData.previlege[1]['Detail Akses Item'].Create) {
+      return (
+        <Link
+          to="/admin/beli/create"
+        >
+          <Button className="my-3 float-right" color="primary">Add</Button>
+        </Link>
+      );
+    }
+  }
+
   const TablePembelian = () => {
     if (userData.previlege[1].Pembelian) {
       return (
         <TabPane tabId="2">
-          <Link
-            to="/admin/beli/create"
-          >
-            <Button className="my-3 float-right" color="primary">Add</Button>
-          </Link>
+          <AddPembelian />
           <TableBoostrap products={pembelian} columns={columnPembelian} />
         </TabPane>
       )

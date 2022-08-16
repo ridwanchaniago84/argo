@@ -37,7 +37,6 @@ import {
 import { getUserData } from '../../variables/config';
 
 const AdminNavbar = (props) => {
-  // localStorage.removeItem('token');
   const userData = getUserData();
 
   const logout = () => {
