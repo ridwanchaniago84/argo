@@ -21,11 +21,14 @@ import axios from 'axios';
 import Select from 'react-select'
 
 const UpdateBeli = () => {
+    const [active, setActive] = useState(0);
+    const [filtered, setFiltered] = useState([]);
+    const [isShow, setIsShow] = useState(false);
+    const [input, setInput] = useState("");
+
     const [items, getItems] = useState([]);
-    const [selectedItem, setSelectedItem] = useState({
-        value: '',
-        label: ''
-    });
+    const [selectedSatuan, setSelectedSatuan] = useState(0);
+    const [satuan, setSatuan] = useState([]);
     const [savedItems, setSavedItems] = useState([]);
     const [quantity, setQuantity] = useState(0);
     const [description, setDescription] = useState('');
@@ -46,7 +49,6 @@ const UpdateBeli = () => {
     const onSubmit = (data) => {
         let dataItems = [];
         savedItems.map((dataItem) => dataItems = [...dataItems, { item_id: dataItem.item_id, qty: dataItem.qty, description: dataItem.description }]);
-
         axios.post(`${endPoint}pembelian/update/${params.beliId}`, {
             username: defaultData.username,
             description: data.description === "" ? defaultData.description : data.description,
@@ -61,11 +63,12 @@ const UpdateBeli = () => {
     const getItemDataSaved = () => {
         axios.post(`${endPoint}pembelian/list-item`, {
             kode_pembelian: params.beliId
-        }).then(response => {
-            response.data.response_data.map(async (data) => {
-                const satuan = await getSatuan(data.satuan);
+        }).then(async response => {
+            let stateItem = [];
 
-                let stateItem = [...savedItems, {
+            await Promise.all(response.data.response_data.map(async (data) => {
+                const satuan = await getSatuan(data.satuan);
+                stateItem = [...stateItem, {
                     item_id: data.item_id,
                     qty: data.qty,
                     description: data.description,
@@ -75,13 +78,21 @@ const UpdateBeli = () => {
                     },
                     satuan: satuan
                 }];
+            }));
 
-                setSavedItems(stateItem);
-            });
+            setSavedItems(stateItem);
         })
     }
 
     useEffect(() => {
+        axios.post(`${endPoint}satuan`, {
+            page: 1,
+            per_page: 10,
+            name: ""
+        }).then(response => {
+            setSatuan(response.data.response);
+        });
+
         axios.get(`${endPoint}pembelian/get/${params.beliId}`).then((response) => {
             setDefaultData(response.data.response_data);
             setTotalPrice(response.data.response_data.price_total);
@@ -122,38 +133,121 @@ const UpdateBeli = () => {
         }
     }
 
-    const getItemData = (quantityItem, desciptionItem, idItem) => {
-        axios.get(`${endPoint}item/${idItem}`)
-            .then(async response => {
-                const satuan = await getSatuan(response.data.response.satuan);
+    const getItemData = () => {
+        axios.post(`${endPoint}item`, {
+            page: 1,
+            per_page: 1,
+            name: input
+        }).then(async response => {
+            const length = response.data.response.length;
+            if (length === 0)
+                return;
 
-                return {
-                    item: response.data.response,
-                    satuan: satuan
-                };
-            }).then((data) => {
-                let stateItem = [...savedItems, {
-                    item_id: idItem,
-                    qty: parseInt(quantityItem),
-                    description: desciptionItem,
-                    data: data.item,
-                    satuan: data.satuan
-                }];
+            const idItem = response.data.response[0].id;
+            const idSatuan = parseInt(selectedSatuan) === 0 ? satuan[0].id : selectedSatuan;
 
-                setTotalPrice(totalPrice + data.item.harga * parseInt(quantityItem));
-                setSavedItems(stateItem);
-            });
+            axios.get(`${endPoint}item/${idItem}`)
+                .then(async response => {
+                    const satuan = await getSatuan(idSatuan);
+
+                    return {
+                        item: response.data.response,
+                        satuan: satuan
+                    };
+                }).then((data) => {
+                    let stateItem = [...savedItems, {
+                        item_id: idItem,
+                        qty: parseInt(quantity),
+                        description: description,
+                        data: data.item,
+                        satuan: data.satuan
+                    }];
+
+                    setTotalPrice(totalPrice + data.item.harga * parseInt(quantity));
+                    setSavedItems(stateItem);
+                });
+        });
     }
 
-    const saveItem = (quantityItem = quantity, desciptionItem = description, idItem = selectedItem.value) => {
+    const saveItem = () => {
         if (quantity === '' || quantity <= 0)
             return;
 
-        let haveSameData = savedItems.find(object => object.item_id === selectedItem.value);
-        if (haveSameData !== undefined)
-            return;
+        // let haveSameData = savedItems.find(object => object.item_id === selectedItem.value);
+        // if (haveSameData !== undefined)
+        //     return;
 
-        getItemData(quantityItem, desciptionItem, idItem);
+        getItemData();
+    }
+
+    const onChange = e => {
+        const input = e.currentTarget.value;
+
+        axios.post(`${endPoint}item`, {
+            page: 1,
+            per_page: 10,
+            name: input
+        }).then(async response => {
+            let suggests = [];
+
+            await Promise.all(response.data.response.map((data) => {
+                suggests = [...suggests, data.name]
+            }));
+
+            setActive(0);
+            setFiltered(suggests);
+            setIsShow(true);
+        });
+
+        setInput(e.currentTarget.value);
+    };
+    const onClick = e => {
+        setActive(0);
+        setFiltered([]);
+        setIsShow(false);
+        setInput(e.currentTarget.innerText)
+    };
+    const onKeyDown = e => {
+        if (e.keyCode === 13) { // enter key
+            setActive(0);
+            setIsShow(false);
+            setInput(filtered[active])
+        }
+        else if (e.keyCode === 38) { // up arrow
+            return (active === 0) ? null : setActive(active - 1);
+        }
+        else if (e.keyCode === 40) { // down arrow
+            return (active - 1 === filtered.length) ? null : setActive(active + 1);
+        }
+    };
+
+    const AutoCompleTes = () => {
+        if (isShow && input) {
+            if (filtered.length) {
+                return (
+                    <ul className="autocomplete">
+                        {filtered.map((suggestion, index) => {
+                            let className;
+                            if (index === active) {
+                                className = "active";
+                            }
+                            return (
+                                <li key={index} className={className} onClick={onClick}>
+                                    {suggestion}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                );
+            } else {
+                return (
+                    <div className="no-autocomplete">
+                        <em>Not found</em>
+                    </div>
+                );
+            }
+        }
+        return <></>;
     }
 
     return (
@@ -215,7 +309,6 @@ const UpdateBeli = () => {
                                                             rows="2"
                                                             autoComplete="description"
                                                             innerRef={ref}
-                                                            value={defaultData.description}
                                                             onChange={({ target: { value } }) => onChange(value)}
                                                         />
                                                     )}
@@ -233,7 +326,17 @@ const UpdateBeli = () => {
                                             <Label>
                                                 Item
                                             </Label>
-                                            <Select options={items} placeholder="Item ..." onChange={setSelectedItem} />
+                                            {/* <Select options={items} placeholder="Item ..." onChange={setSelectedItem} />
+                                             */}
+                                            <Input
+                                                placeholder="Item ..."
+                                                type="text"
+                                                style={{ height: 38 }}
+                                                onChange={onChange}
+                                                onKeyDown={onKeyDown}
+                                                value={input}
+                                            />
+                                            <AutoCompleTes />
                                         </FormGroup>
                                     </Col>
                                     <Col xl="2">
@@ -247,6 +350,24 @@ const UpdateBeli = () => {
                                                 style={{ height: 38 }}
                                                 onChange={(e) => setQuantity(e.target.value)}
                                             />
+                                        </FormGroup>
+                                    </Col>
+                                    <Col xl="12">
+                                        <FormGroup>
+                                            <Label>
+                                                Satuan
+                                            </Label>
+                                            <Input
+                                                onChange={(e) => setSelectedSatuan(e.target.value)}
+                                                name="satuan"
+                                                type="select"
+                                            >
+                                                {satuan.map((data, key) => {
+                                                    return (
+                                                        <option key={key} value={data.id}>{data.name}</option>
+                                                    );
+                                                })}
+                                            </Input>
                                         </FormGroup>
                                     </Col>
                                     <Col xl="12">

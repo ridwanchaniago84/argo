@@ -28,20 +28,21 @@ const ViewBeli = () => {
     const getItemData = () => {
         axios.post(`${endPoint}pembelian/list-item`, {
             kode_pembelian: params.beliId
-        }).then(response => {
-            response.data.response_data.map(async (data) => {
-                const satuan = await getSatuan(data.satuan);
+        }).then(async response => {
+            let stateItem = [];
 
-                let stateItem = [...savedItems, {
+            await Promise.all(response.data.response_data.map(async (data) => {
+                const satuan = await getSatuan(data.satuan);
+                stateItem = [...stateItem, {
                     item_id: data.item_id,
                     qty: data.qty,
                     description: data.description,
                     data: data,
                     satuan: satuan
                 }];
+            }));
 
-                setSavedItems(stateItem);
-            });
+            setSavedItems(stateItem);
         })
     }
 
