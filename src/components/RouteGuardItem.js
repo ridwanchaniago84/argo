@@ -8,7 +8,7 @@ export const RouteWriteGuardItem = ({ component: Component, ...rest }) => {
     return (
         <Route {...rest}
             render={props => (
-                userData.previlege[0]['Detail Akses Item'].Create ?
+                userData.previlege[0]['Detail Akses Item'].Create === "True" ?
                     <Component {...props} />
                     :
                     <Redirect to={{ pathname: '/' }} />
@@ -23,7 +23,7 @@ export const RouteReadGuardItem = ({ component: Component, ...rest }) => {
     return (
         <Route {...rest}
             render={props => (
-                userData.previlege[0]['Detail Akses Item'].Read ?
+                userData.previlege[0]['Detail Akses Item'].Read === "True" ?
                     <Component {...props} />
                     :
                     <Redirect to={{ pathname: '/' }} />
@@ -38,7 +38,7 @@ const RouteGuardItem = ({ component: Component, ...rest }) => {
     return (
         <Route {...rest}
             render={props => (
-                userData.previlege[0].Item ?
+                userData.previlege[0].Item === "True" ?
                     <Component {...props} />
                     :
                     <Redirect to={{ pathname: '/' }} />

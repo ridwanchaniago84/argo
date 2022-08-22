@@ -42,7 +42,7 @@ const Pembelian = () => {
   const userData = getUserData();
   const [products, setProducts] = useState([]);
   const [pembelian, setPembelian] = useState([]);
-  const [activeTab, setActiveTab] = useState(userData.previlege[0].Item ? "1" : "2");
+  const [activeTab, setActiveTab] = useState(userData.previlege[0].Item === "True" ? "1" : "2");
 
   useEffect(() => {
     axios.post(`${endPoint}item`, {
@@ -64,7 +64,7 @@ const Pembelian = () => {
   }, []);
 
   const ButtonUpdate = (props) => {
-    if (userData.previlege[1]['Detail Akses Item'].Create) {
+    if (userData.previlege[1]['Detail Akses Pembelian'].Create === "True") {
       return (
         <Button
           color="primary"
@@ -75,10 +75,13 @@ const Pembelian = () => {
         </Button>
       );
     }
+    return (
+      <></>
+    )
   }
 
   const ButtonDetail = (props) => {
-    if (userData.previlege[1]['Detail Akses Item'].Read) {
+    if (userData.previlege[1]['Detail Akses Pembelian'].Read === "True") {
       return (
         <Button
           color="secondary"
@@ -89,6 +92,9 @@ const Pembelian = () => {
         </Button>
       );
     }
+    return (
+      <></>
+    )
   }
 
   const columns = [{
@@ -148,7 +154,7 @@ const Pembelian = () => {
   ];
 
   const NavItemPriv = () => {
-    if (userData.previlege[0].Item) {
+    if (userData.previlege[0].Item === "True") {
       return (
         <NavItem>
           <NavLink
@@ -160,10 +166,13 @@ const Pembelian = () => {
         </NavItem>
       )
     }
+    return (
+      <></>
+    )
   }
 
   const AddItem = () => {
-    if (userData.previlege[0]['Detail Akses Item'].Create) {
+    if (userData.previlege[0]['Detail Akses Item'].Create === "True") {
       return (
         <Link
           to="/admin/item/create"
@@ -172,10 +181,13 @@ const Pembelian = () => {
         </Link>
       );
     }
+    return (
+      <></>
+    )
   }
 
   const TableItem = () => {
-    if (userData.previlege[0].Item) {
+    if (userData.previlege[0].Item === "True") {
       return (
         <TabPane tabId="1">
           <AddItem />
@@ -183,10 +195,13 @@ const Pembelian = () => {
         </TabPane>
       )
     }
+    return (
+      <></>
+    )
   }
 
   const NavPembelianPriv = () => {
-    if (userData.previlege[1].Pembelian) {
+    if (userData.previlege[1].Pembelian === "True") {
       return (
         <NavItem>
           <NavLink
@@ -198,10 +213,13 @@ const Pembelian = () => {
         </NavItem>
       )
     }
+    return (
+      <></>
+    )
   }
 
   const AddPembelian = () => {
-    if (userData.previlege[1]['Detail Akses Item'].Create) {
+    if (userData.previlege[1]['Detail Akses Pembelian'].Create === "True") {
       return (
         <Link
           to="/admin/beli/create"
@@ -210,10 +228,13 @@ const Pembelian = () => {
         </Link>
       );
     }
+    return (
+      <></>
+    )
   }
 
   const TablePembelian = () => {
-    if (userData.previlege[1].Pembelian) {
+    if (userData.previlege[1].Pembelian === "True") {
       return (
         <TabPane tabId="2">
           <AddPembelian />
@@ -221,6 +242,9 @@ const Pembelian = () => {
         </TabPane>
       )
     }
+    return (
+      <></>
+    )
   }
 
   return (

@@ -27,7 +27,11 @@ const UpdateBeli = () => {
 
     const [selectedSatuan, setSelectedSatuan] = useState(0);
     const [satuan, setSatuan] = useState([]);
+
     const [savedItems, setSavedItems] = useState([]);
+    const [tempSavedItems, setTempSavedItems] = useState([]);
+    const [editingItem, setEditingitem] = useState([]);
+
     const [quantity, setQuantity] = useState(0);
     const [description, setDescription] = useState('');
     const [totalPrice, setTotalPrice] = useState(0);
@@ -63,6 +67,8 @@ const UpdateBeli = () => {
             kode_pembelian: params.beliId
         }).then(async response => {
             let stateItem = [];
+            let tempItem = [];
+            let stateEditing = [];
 
             await Promise.all(response.data.response_data.map(async (data) => {
                 const satuan = await getSatuan(data.satuan);
@@ -76,9 +82,20 @@ const UpdateBeli = () => {
                     },
                     satuan: satuan
                 }];
+
+                tempItem = [...tempItem, {
+                    price: data.harga,
+                    total: data.harga * data.qty
+                }];
+
+                stateEditing = [...stateEditing, {
+                    editing: false
+                }];
             }));
 
+            setEditingitem(stateEditing);
             setSavedItems(stateItem);
+            setTempSavedItems(tempItem);
         })
     }
 
@@ -143,6 +160,7 @@ const UpdateBeli = () => {
                     };
                 }).then((data) => {
                     let stateItem = [...savedItems, {
+                        editing: false,
                         item_id: idItem,
                         qty: parseInt(quantity),
                         description: description,
@@ -150,8 +168,19 @@ const UpdateBeli = () => {
                         satuan: data.satuan
                     }];
 
+                    let tempItem = [...tempSavedItems, {
+                        price: data.harga,
+                        total: data.harga * data.qty
+                    }];
+
+                    let stateEditing = [...editingItem, {
+                        editing: false
+                    }];
+
+                    setEditingitem(stateEditing);
                     setTotalPrice(totalPrice + data.item.harga * parseInt(quantity));
                     setSavedItems(stateItem);
+                    setTempSavedItems(tempItem);
                 });
         });
     }
@@ -233,6 +262,31 @@ const UpdateBeli = () => {
             }
         }
         return <></>;
+    }
+
+    const changePriceStatus = (index, status) => {
+        setEditingitem([
+            ...editingItem.slice(0, index),
+            Object.assign({}, editingItem[index], { editing: status }),
+            ...editingItem.slice(index + 1)
+        ]);
+    }
+
+    const changeItemDataTable = async (arg) => {
+        setTotalPrice(totalPrice - arg.defaultPrice + tempSavedItems[arg.index].price);
+
+        setSavedItems([
+            ...savedItems.slice(0, arg.index),
+            Object.assign({}, savedItems[arg.index], {
+                data: {
+                    name: arg.itemName,
+                    harga: tempSavedItems[arg.index].price
+                }
+            }),
+            ...savedItems.slice(arg.index + 1)
+        ]);
+
+        changePriceStatus(arg.index, false);
     }
 
     return (
@@ -392,10 +446,60 @@ const UpdateBeli = () => {
                                                                 <td>{savedItem.data.name}</td>
                                                                 <td>{savedItem.satuan.name}</td>
                                                                 <td>{savedItem.qty}</td>
-                                                                <td>{formatRupiah(savedItem.data.harga)}</td>
-                                                                <td>{formatRupiah(savedItem.data.harga * savedItem.qty)}</td>
                                                                 <td>
-                                                                    <Button color="danger" onClick={() => deleteItem(savedItem.item_id)}>Delete</Button>
+                                                                    {editingItem[key].editing ? (
+                                                                        <Input
+                                                                            placeholder="Harga"
+                                                                            type="number"
+                                                                            value={tempSavedItems[key].price}
+                                                                            onChange={(e) => {
+                                                                                setTempSavedItems([
+                                                                                    ...tempSavedItems.slice(0, key),
+                                                                                    Object.assign({}, tempSavedItems[key], { price: e.target.value, total: e.target.value * savedItem.qty }),
+                                                                                    ...tempSavedItems.slice(key + 1)
+                                                                                ]);
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                            <>{formatRupiah(savedItem.data.harga)}</>
+                                                                        )}
+                                                                </td>
+                                                                <td>
+                                                                    {editingItem[key].editing ? (
+                                                                        <Input
+                                                                            placeholder="Total"
+                                                                            type="number"
+                                                                            value={tempSavedItems[key].total}
+                                                                            disabled
+                                                                        />
+                                                                    ) : (
+                                                                            <>{formatRupiah(savedItem.data.harga * savedItem.qty)}</>
+                                                                        )}
+                                                                </td>
+                                                                <td>
+                                                                    {editingItem[key].editing ? (
+                                                                        <>
+                                                                            <Button color="warning" onClick={() => changeItemDataTable({
+                                                                                defaultPrice: savedItem.data.harga,
+                                                                                index: key,
+                                                                                itemName: savedItem.data.name
+                                                                            })}>Update</Button>
+                                                                            <Button color="danger" onClick={() => {
+                                                                                setTempSavedItems([
+                                                                                    ...tempSavedItems.slice(0, key),
+                                                                                    Object.assign({}, tempSavedItems[key], { price: savedItem.data.harga, total: savedItem.data.harga * savedItem.qty }),
+                                                                                    ...tempSavedItems.slice(key + 1)
+                                                                                ]);
+
+                                                                                changePriceStatus(key, false);
+                                                                            }}>Cancel</Button>
+                                                                        </>
+                                                                    ) : (
+                                                                            <>
+                                                                                <Button color="warning" onClick={() => changePriceStatus(key, true)}>Edit</Button>
+                                                                                <Button color="danger" onClick={() => deleteItem(savedItem.item_id)}>Delete</Button>
+                                                                            </>
+                                                                        )}
                                                                 </td>
                                                             </tr>
                                                         )

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const endPoint = 'https://adf6-103-121-21-27.ngrok.io/';
+export const endPoint = 'https://e4d1-158-140-163-210.ngrok.io/';
 
 export const setAuthToken = token => {
     if (token) {

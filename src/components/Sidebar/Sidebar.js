@@ -51,6 +51,7 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import { getUserData } from '../../variables/config';
 
 var ps;
 
@@ -71,7 +72,15 @@ const Sidebar = (props) => {
   // creates the links that appear in the left menu / Sidebar
   const createLinks = (routes) => {
     return routes.map((prop, key) => {
-      if (prop.layout === '/admin')
+      const userData = getUserData();
+
+      if (prop.name === 'Satuan' && userData.previlege[2].Satuan === "False") {
+        return (
+          <></>
+        );
+      }
+
+      if (prop.layout === '/admin') {
         return (
           <NavItem key={key}>
             <NavLink
@@ -85,6 +94,7 @@ const Sidebar = (props) => {
             </NavLink>
           </NavItem>
         );
+      }
     });
   };
 

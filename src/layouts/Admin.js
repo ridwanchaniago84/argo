@@ -31,6 +31,7 @@ import UpdateBeli from '../views/Admin/Pembelian/UpdateBeli';
 import ViewBeli from '../views/Admin/Pembelian/ViewBeli';
 import { RouteWriteGuardItem } from '../components/RouteGuardItem';
 import { RouteWriteGuardPembelian, RouteReadGuardPembelian } from '../components/RouteGuardPembelian'
+import { RouteSatuan } from '../components/RouteGuard'
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
@@ -45,6 +46,14 @@ const Admin = (props) => {
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
       if (prop.layout === "/admin") {
+
+        if (prop.name === 'Satuan') {
+          return (<RouteSatuan path={prop.layout + prop.path}
+            component={prop.component}
+            key={key} />
+          );
+        }
+
         return (
           <Route
             path={prop.layout + prop.path}

@@ -8,7 +8,7 @@ export const RouteWriteGuardPembelian = ({ component: Component, ...rest }) => {
     return (
         <Route {...rest}
             render={props => (
-                userData.previlege[1]['Detail Akses Item'].Create ?
+                userData.previlege[1]['Detail Akses Pembelian'].Create === "True" ?
                     <Component {...props} />
                     :
                     <Redirect to={{ pathname: '/' }} />
@@ -23,7 +23,7 @@ export const RouteReadGuardPembelian = ({ component: Component, ...rest }) => {
     return (
         <Route {...rest}
             render={props => (
-                userData.previlege[1]['Detail Akses Item'].Read ?
+                userData.previlege[1]['Detail Akses Pembelian'].Read === "True" ?
                     <Component {...props} />
                     :
                     <Redirect to={{ pathname: '/' }} />
@@ -38,7 +38,7 @@ const RouteGuardPembelian = ({ component: Component, ...rest }) => {
     return (
         <Route {...rest}
             render={props => (
-                userData.previlege[1].Pembelian ?
+                userData.previlege[1].Pembelian === "True" ?
                     <Component {...props} />
                     :
                     <Redirect to={{ pathname: '/' }} />
